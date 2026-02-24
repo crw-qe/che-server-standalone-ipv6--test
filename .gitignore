@@ -1,0 +1,3 @@
+# Generated at runtime - do not commit
+.test-env
+.che-nginx-proxy.conf
