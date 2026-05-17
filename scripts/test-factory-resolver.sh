@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Test factory resolver with IPv6 URLs (PR 951).
+# Test factory resolver with IPv6 URLs.
 # Uses PROXY_IPV6 (GitHub-Enterprise-compatible) for full end-to-end success.
 #
 
@@ -17,7 +17,7 @@ fi
 source "$REPO_DIR/.test-env"
 
 AUTH_TOKEN="${OC_TOKEN:-$(oc whoami -t 2>/dev/null || true)}"
-[ -z "$AUTH_TOKEN" ] && echo "[WARN] No auth token - requests may get 401" || echo "[INFO] Using CRC auth token"
+[ -z "$AUTH_TOKEN" ] && echo "[WARN] No auth token - requests may get 401" || echo "[INFO] Using OpenShift auth token"
 
 # Prefer proxy URL (full success) over direct Gitea (may 400 due to API differences)
 TEST_IPV6="${PROXY_IPV6:-$GITEA_IPV6}"
@@ -31,7 +31,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo "=========================================="
-echo "Factory Resolver IPv6 Tests (PR 951)"
+echo "Factory Resolver IPv6 Tests"
 echo "=========================================="
 echo ""
 
