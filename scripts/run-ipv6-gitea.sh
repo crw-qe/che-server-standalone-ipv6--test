@@ -44,10 +44,13 @@ fi
 
 podman stop $GITEA_CONTAINER 2>/dev/null || true
 podman rm $GITEA_CONTAINER 2>/dev/null || true
-podman network rm $NETWORK_NAME 2>/dev/null || true
 
-echo -e "${GREEN}[STEP]${NC} Creating IPv6 network..."
-podman network create --ipv6 --subnet=$IPV6_SUBNET --gateway=$IPV6_GATEWAY $NETWORK_NAME
+if podman network exists "$NETWORK_NAME" 2>/dev/null; then
+    echo -e "${YELLOW}[INFO]${NC} Network $NETWORK_NAME already exists, reusing."
+else
+    echo -e "${GREEN}[STEP]${NC} Creating IPv6 network..."
+    podman network create --ipv6 --subnet=$IPV6_SUBNET --gateway=$IPV6_GATEWAY $NETWORK_NAME
+fi
 
 echo -e "${GREEN}[STEP]${NC} Starting Gitea..."
 podman run -d \
@@ -57,6 +60,7 @@ podman run -d \
   -e USER_GID=1000 \
   -e GITEA__database__DB_TYPE=sqlite3 \
   -e GITEA__server__ROOT_URL=http://localhost:$GITEA_PORT/ \
+  -e GITEA__security__INSTALL_LOCK=true \
   -p $GITEA_PORT:3000 \
   -p 2222:22 \
   -v gitea-data:/data \
@@ -82,7 +86,7 @@ for i in $(seq 1 30); do
 done
 
 echo -e "${GREEN}[STEP]${NC} Configuring Gitea..."
-podman exec $GITEA_CONTAINER gitea admin user create \
+podman exec --user 1000 $GITEA_CONTAINER gitea admin user create \
   --username $GITEA_USER \
   --password $GITEA_PASS \
   --email $GITEA_EMAIL \
